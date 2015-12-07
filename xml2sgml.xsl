@@ -117,16 +117,15 @@
         </xsl:attribute>
     </xsl:template>
     
-    <xsl:template match="xref[@ref-type='aff']">
-        <xref>
-            <xsl:copy-of select="@*"/>
-            <sup><xsl:value-of select="."/></sup>
-        </xref>
-    </xsl:template>
     <xsl:template match="xref">
         <xsl:variable name="text"><xsl:apply-templates select="*|text()" mode="text-only"/></xsl:variable>
         <xsl:element name="{name()}">
-            <xsl:copy-of select="@*"/>
+            <xsl:choose>
+                <xsl:when test="not(@ref-type) and starts-with(@rid, 'fn')">
+                    <xsl:attribute name="ref-type">fn</xsl:attribute>
+                </xsl:when>
+            </xsl:choose>
+            <xsl:apply-templates select="@*"/>
             <xsl:choose>
                 <xsl:when test="sup/text() = normalize-space($text)">
                     <sup><xsl:value-of select="normalize-space($text)"/></sup>
@@ -135,7 +134,19 @@
             </xsl:choose>
         </xsl:element>
     </xsl:template>
-    
+    <xsl:template match="xref[@ref-type='aff']">
+        <xref>
+            <xsl:copy-of select="@*"/>
+            <sup><xsl:value-of select="."/></sup>
+        </xref>
+    </xsl:template>
+    <xsl:template match="xref[@ref-type='bibr']/@rid">
+        <xsl:attribute name="rid">r<xsl:value-of select="string(number(substring(.,2)))"/></xsl:attribute>
+    </xsl:template>
+    <xsl:template match="xref[@ref-type='FN']/@ref-type">
+        <xsl:attribute name="ref-type">fn</xsl:attribute>
+    </xsl:template>
+
     <xsl:template name="dateiso">
         <xsl:param name="day" select="''"/>
         <xsl:param name="month" select="''"/>
@@ -538,8 +549,13 @@
         </xsl:element>
     </xsl:template>
     <xsl:template match="table-wrap"></xsl:template>
-    <xsl:template match="p[disp-formula|fig|list|table-wrap]">
-        <xsl:apply-templates select="disp-formula|fig|list|table-wrap"/>
+    <xsl:template match="p[disp-formula|fig|list|table-wrap|disp-quote|boxed-text]">
+        <xsl:if test="normalize-space(text()) != ''">
+            <p>
+                <xsl:apply-templates select="text()|*[not(self::disp-formula|self::fig|self::list|self::table-wrap|self::disp-quote|self::boxed-text)]"/>
+            </p>
+        </xsl:if>
+        <xsl:apply-templates select="disp-formula|fig|list|table-wrap|disp-quote|boxed-text"/>
     </xsl:template>
     <xsl:template match="disp-quote">
         <quote>
@@ -569,7 +585,13 @@
     </xsl:template>
     <xsl:template match="graphic|inline-graphic">
         <graphic>
-            <xsl:attribute name="href">?{base_name}</xsl:attribute>
+            <xsl:attribute name="href">
+                <xsl:choose>
+                    <xsl:when test="contains(@xlink:href, '.tif')"><xsl:value-of select="substring-before(@xlink:href, '.tif')"/>.jpg</xsl:when>
+                    <xsl:when test="contains(@xlink:href, '.eps')"><xsl:value-of select="substring-before(@xlink:href, '.eps')"/>.jpg</xsl:when>
+                    <xsl:otherwise><xsl:value-of select="@xlink:href"/></xsl:otherwise>
+                </xsl:choose>
+            </xsl:attribute>
             <img>
                 <xsl:attribute name="src">../src/<xsl:value-of select="@xlink:href"/></xsl:attribute>
             </img>
@@ -629,9 +651,15 @@
         </xsl:attribute>
     </xsl:template>
     
-    <xsl:template match="p[boxed-text]">
-        <xsl:apply-templates select="boxed-text"/>
+    <xsl:template match="list[not(@list-type) and count(list-item) = 1]">
+        <quote>
+            <xsl:choose>
+                <xsl:when test="count(list-item/*) &gt; 1"><xsl:apply-templates select="list-item/*|list-item/text()"/></xsl:when>
+                <xsl:otherwise><xsl:apply-templates select="list-item/p/*|list-item/p/text()"/></xsl:otherwise>
+            </xsl:choose>
+        </quote>
     </xsl:template>
+
     <xsl:template match="boxed-text">
         <boxedtxt>
             <xsl:apply-templates select="@id"/>
@@ -646,6 +674,12 @@
                 </xsl:otherwise>
             </xsl:choose>
         </boxedtxt>
+    </xsl:template>
+
+    <xsl:template match="inline-supplementary-material">
+        <supplmat href="{@xlink:href}">
+            <xsl:apply-templates select="*|text()"/>
+        </supplmat>
     </xsl:template>
     <!-- back -->
     <xsl:template match="article" mode="back">
@@ -668,7 +702,7 @@
     </xsl:template>
     <xsl:template match="ref">
         <xsl:variable name="id"><xsl:choose>
-            <xsl:when test="@id"><xsl:value-of select="substring(@id,2)"/></xsl:when><xsl:otherwise><xsl:value-of select="position()"/></xsl:otherwise>
+            <xsl:when test="@id"><xsl:value-of select="string(number(substring(@id,2)))"/></xsl:when><xsl:otherwise><xsl:value-of select="position()"/></xsl:otherwise>
         </xsl:choose></xsl:variable>
         <xsl:element name="{name()}">
             <xsl:attribute name="id">r<xsl:value-of select="$id"/></xsl:attribute>
@@ -757,6 +791,9 @@
     <xsl:template match="author-notes/fn|fn-group/fn">
         <fngrp>
             <xsl:apply-templates select="@*"/>
+            <xsl:if test="not(@fn-type)">
+                <xsl:attribute name="fntype">other</xsl:attribute>
+            </xsl:if>
             <xsl:apply-templates select="label"/>
             <xsl:apply-templates select="p/*|p/text()"/>
         </fngrp>

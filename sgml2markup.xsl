@@ -66,7 +66,7 @@
                     .corresp{
                     color: #7F0308;
                     }
-                    .figgrp, .cauthor, .date, .cltrial, .revised, .received, .accepted{
+                    .figgrp, .cauthor, .date, .cltrial, .revised, .received, .accepted, .supplmat{
                     color: #0F7F12;
                     }
                     .doi, .chptitle, .hist, .table, .thead, .tbody, .confgrp{

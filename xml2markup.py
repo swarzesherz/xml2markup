@@ -77,13 +77,11 @@ newdom = None
 try:
 	newdom = xslt(dom)
 except Exception, e:
-	print e
-	traceback.print_exc(file=sys.stdout)
 	print arguments.dom_file
 	exit(1)
 
 
-dom = etree.fromstring(re.sub(r'<img src="(.+?)(\.tif|\.tiff|\.eps)"/>', r'<img src="\1.jpg"/>', etree.tostring(newdom, encoding='utf-8').replace('{base_name}', basename)))
+dom = etree.fromstring(re.sub(r'<img src="(.+?)(\.tif|\.tiff|\.eps)"/>', r'<img src="\1.jpg"/>', etree.tostring(newdom, encoding='utf-8')))
 xslt = etree.XSLT(etree.parse('sgml2markup.xsl'))
 try:
 	newdom = xslt(dom)
