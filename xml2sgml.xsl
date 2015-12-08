@@ -723,16 +723,19 @@
     <xsl:template match="element-citation">
         <xsl:apply-templates select="*"/>
     </xsl:template>
-    <xsl:template match="article-title">
+    <xsl:template match="element-citation/*">
+        <xsl:apply-templates select="*|text()"/>
+    </xsl:template>
+    <xsl:template match="element-citation/article-title">
         <arttitle><xsl:apply-templates select=".//text()"/></arttitle>
     </xsl:template>
-    <xsl:template match="chapter-title">
+    <xsl:template match="element-citation/chapter-title">
         <chptitle><xsl:apply-templates select=".//text()"/></chptitle>
     </xsl:template>
     <xsl:template match="element-citation/pub-id[@pub-id-type='other']">
         <reportid><xsl:value-of select="normalize-space(.)"/></reportid>
     </xsl:template>
-    <xsl:template match="patent">
+    <xsl:template match="element-citation/patent|patent">
         <patentno country="{@country}"><xsl:value-of select="normalize-space(.)"/></patentno>
     </xsl:template>
     <xsl:template match="element-citation/comment">
@@ -757,12 +760,12 @@
         </pages>
     </xsl:template>
     <xsl:template match="element-citation/lpage"/>
-    <xsl:template match="volume">
+    <xsl:template match="element-citation/volume|volume">
         <volid>
             <xsl:value-of select="normalize-space(.)"/>
         </volid>
     </xsl:template>
-    <xsl:template match="issueno">
+    <xsl:template match="element-citation/issueno|issueno">
         <issueno>
             <xsl:value-of select="issue"/>
             <xsl:if test="issue-part"> <xsl:value-of select="issue-part"/></xsl:if>
@@ -772,6 +775,18 @@
         <url>
             <xsl:value-of select="@xlink:href"/>
         </url>
+    </xsl:template>
+    <xsl:template match="element-citation/pub-id">
+        <pubid>
+            <xsl:attribute name="idtype"><xsl:value-of select="@pub-id-type"/></xsl:attribute>
+            <xsl:value-of select="."/>
+        </pubid>
+    </xsl:template>
+    <xsl:template match="element-citation/date-in-citation[@content-type='access-date']">
+        <cited>
+            <xsl:attribute name="dateiso"><xsl:value-of select="translate(@iso-8601-date, '-', '')"/></xsl:attribute>
+            <xsl:value-of select="."/>
+        </cited>
     </xsl:template>
     <xsl:template match="fn/@fn-type">
         <xsl:attribute name="fntype">
