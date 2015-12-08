@@ -729,7 +729,7 @@
     <xsl:template match="element-citation/pub-id[@pub-id-type='other']">
         <reportid><xsl:value-of select="normalize-space(.)"/></reportid>
     </xsl:template>
-    <xsl:template match="element-citation/patent|patent">
+    <xsl:template match="patent">
         <patentno country="{@country}"><xsl:value-of select="normalize-space(.)"/></patentno>
     </xsl:template>
     <xsl:template match="element-citation/comment">
@@ -754,15 +754,21 @@
         </pages>
     </xsl:template>
     <xsl:template match="element-citation/lpage"/>
-    <xsl:template match="element-citation/volume|volume">
+    <xsl:template match="volume">
         <volid>
             <xsl:value-of select="normalize-space(.)"/>
         </volid>
     </xsl:template>
-    <xsl:template match="element-citation/issueno|issueno">
+    <xsl:template match="issueno">
         <issueno>
             <xsl:value-of select="issue"/>
             <xsl:if test="issue-part"> <xsl:value-of select="issue-part"/></xsl:if>
+        </issueno>
+    </xsl:template>
+    <xsl:template match="issue">
+        <issueno>
+            <xsl:value-of select="."/>
+            <xsl:if test="..//issue-part"> <xsl:value-of select="..//issue-part"/></xsl:if>
         </issueno>
     </xsl:template>
     <xsl:template match="element-citation//ext-link[@ext-link-type='uri']">
