@@ -723,14 +723,8 @@
     <xsl:template match="element-citation">
         <xsl:apply-templates select="*"/>
     </xsl:template>
-    <xsl:template match="element-citation/*">
-        <xsl:apply-templates select="*|text()"/>
-    </xsl:template>
-    <xsl:template match="element-citation/article-title">
+    <xsl:template match="article-title">
         <arttitle><xsl:apply-templates select=".//text()"/></arttitle>
-    </xsl:template>
-    <xsl:template match="element-citation/chapter-title">
-        <chptitle><xsl:apply-templates select=".//text()"/></chptitle>
     </xsl:template>
     <xsl:template match="element-citation/pub-id[@pub-id-type='other']">
         <reportid><xsl:value-of select="normalize-space(.)"/></reportid>
@@ -787,6 +781,10 @@
             <xsl:attribute name="dateiso"><xsl:value-of select="translate(@iso-8601-date, '-', '')"/></xsl:attribute>
             <xsl:value-of select="."/>
         </cited>
+    </xsl:template>
+    <xsl:template match="element-citation/conference">
+        <!-- TODO -->
+        <xsl:apply-templates select="text()"/>
     </xsl:template>
     <xsl:template match="fn/@fn-type">
         <xsl:attribute name="fntype">
