@@ -27,7 +27,7 @@
     </xsl:template>
     
     
-    <xsl:template match="attrib | series | app | anonym | isbn | glossary | term | def | response | p | sec | label | subtitle | edition |  issn | corresp | ack | tbody | td | tr | source | kwd">
+    <xsl:template match="attrib | series | app | anonym | isbn | glossary | term | def | response | p | sec | label | subtitle | edition |  issn | corresp | ack | tbody | td | tr | source | kwd | term">
         <xsl:param name="id"/>
         
         <xsl:element name="{name()}">
@@ -549,13 +549,13 @@
         </xsl:element>
     </xsl:template>
     <xsl:template match="table-wrap"></xsl:template>
-    <xsl:template match="p[disp-formula|fig|list|table-wrap|disp-quote|boxed-text]">
+    <xsl:template match="p[disp-formula|fig|list|table-wrap|disp-quote|boxed-text|def-list]">
         <xsl:if test="normalize-space(text()) != ''">
             <p>
-                <xsl:apply-templates select="text()|*[not(self::disp-formula|self::fig|self::list|self::table-wrap|self::disp-quote|self::boxed-text)]"/>
+                <xsl:apply-templates select="text()|*[not(self::disp-formula|self::fig|self::list|self::table-wrap|self::disp-quote|self::boxed-text|self::def-list)]"/>
             </p>
         </xsl:if>
-        <xsl:apply-templates select="disp-formula|fig|list|table-wrap|disp-quote|boxed-text"/>
+        <xsl:apply-templates select="disp-formula|fig|list|table-wrap|disp-quote|boxed-text|def-list"/>
     </xsl:template>
     <xsl:template match="disp-quote">
         <quote>
@@ -564,6 +564,23 @@
                 <xsl:otherwise><xsl:apply-templates select="p/*|p/text()"/></xsl:otherwise>
             </xsl:choose>
         </quote>
+    </xsl:template>
+    <xsl:template match="def-list">
+        <deflist>
+            <xsl:apply-templates select="@*"/>
+            <xsl:apply-templates select="title|def-item|def-list"/>
+        </deflist>
+    </xsl:template>
+    <xsl:template match="def-item">
+        <defitem>
+            <xsl:apply-templates select="@*"/>
+            <xsl:apply-templates select="term|def"/>
+        </defitem>
+    </xsl:template>
+    <xsl:template match="def[p]">
+        <def>
+            <xsl:apply-templates select="*|text()"/>
+        </def>
     </xsl:template>
     <xsl:template match="disp-formula|inline-formula">
         <equation>

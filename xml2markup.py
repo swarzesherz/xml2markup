@@ -1,11 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import argparse
-from lxml import etree, html
+from lxml import etree
 import re
-import xml.dom.minidom
 import glob, os, shutil
-import sys, traceback
 
 
 def img_converter(src_path, destination_path):
@@ -103,7 +101,7 @@ def xml2markup(source):
 
 	# write file to scielo_markup
 	with open(output_file, 'w') as f:
-		f.write((etree.tostring(newdom, encoding='utf-8', pretty_print=True, method="html")))
+		f.write((etree.tostring(newdom, encoding='utf-8', pretty_print=True, method="xml")))
 
 parser = argparse.ArgumentParser()
 parser.add_argument('source', action='store', help='XML file or scielo_package dir')

@@ -28,12 +28,11 @@
             </xsl:choose>
         </func:result>
     </func:function>
-    
-    <xsl:template match="doc">
+    <xsl:template match="/">
         <html>
             <head>
-                <title><xsl:value-of select="./doctitle"/></title>
-                <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+                <title><xsl:value-of select="doc/doctitle"/></title>
+                <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
                 <style type="text/css">
                     *, body{
                     font-size: 12.0 pt;
@@ -42,7 +41,7 @@
                     .doc, .tr, .td, .th, .ref, .contract, .edition{
                     color: #FD9BCB;
                     }
-                    .toctitle, .graphic, .list, .source, .kwd, .onbehalf, .ack, .issn{
+                    .toctitle, .graphic, .list, .source, .kwd, .onbehalf, .ack, .issn, .def{
                     color: #389867;
                     }
                     .doctitle, .country, .xmlbody, .sec, .subsec, .sectitle, .caption, .equation, .li, .authors, .moreinfo, .pages, .pubid, .url{
@@ -54,7 +53,7 @@
                     .xref, .subtitle, .pauthor, .et-al, .pubname, .part, .cited, .thesgrp{
                     color: #FC28FC;
                     }
-                    .normaff, .city, .quote, .isbn, .extent, .series, .ctreg, .suppl, .series{
+                    .normaff, .city, .quote, .isbn, .extent, .series, .ctreg, .suppl, .series, .deflist{
                     color: #FC0D1B;
                     }
                     .label, .email, .p, .xmlabstr, .kwdgrp, .boxedtxt, .patentno{
@@ -66,7 +65,7 @@
                     .corresp{
                     color: #7F0308;
                     }
-                    .figgrp, .cauthor, .date, .cltrial, .revised, .received, .accepted, .supplmat{
+                    .figgrp, .cauthor, .date, .cltrial, .revised, .received, .accepted, .supplmat, .defitem{
                     color: #0F7F12;
                     }
                     .doi, .chptitle, .hist, .table, .thead, .tbody, .confgrp{
@@ -75,7 +74,7 @@
                     .product, .corpauth, .text-ref{
                     color: #FC6621;
                     }
-                    .related{
+                    .related, .term{
                     color: #0B24FB;
                     }
                     table {
@@ -87,17 +86,24 @@
                 </style>
             </head>
             <body>
-                <xsl:apply-templates select="." mode="format"/>
+                <xsl:apply-templates select="doc" mode="format"/>
             </body>
         </html>
     </xsl:template>
     <xsl:template match="*" mode="format">
         <xsl:apply-templates select="." mode="markup"/>
     </xsl:template>
-    <xsl:template match="doc|author|corpauth|onbehalf|normaff|corresp|product|cltrial|hist|revised|received|accepted|related|xmlabstr|kwdgrp|xmlbody|ack|refs|ref|text-ref|subsec|figgrp|equation|list|li|tabwrap|*[name(..) != 'li']/p|*[name(..) != 'equation' and name(..) != 'p']/graphic|boxedtxt" mode="format">
-        <p>
-            <xsl:apply-templates select="." mode="markup"/>
-        </p>
+    <xsl:template match="doc|author|corpauth|onbehalf|normaff|corresp|product|cltrial|hist|revised|received|accepted|related|xmlabstr|kwdgrp|xmlbody|ack|refs|ref|text-ref|subsec|figgrp|equation|list|li|tabwrap|*[name(..) != 'li']/p|*[name(..) != 'equation' and name(..) != 'p']/graphic|boxedtxt|deflist|defitem" mode="format">
+        <xsl:choose>
+            <xsl:when test="doc|author|corpauth|onbehalf|normaff|corresp|product|cltrial|hist|revised|received|accepted|related|xmlabstr|kwdgrp|xmlbody|ack|refs|ref|subsec|figgrp|equation|list|li|tabwrap|*[name(..) != 'li']/p|*[name(..) != 'equation' and name(..) != 'p']/graphic|boxedtxt|p|table|deflist|defitem">
+                <p><xsl:apply-templates select="." mode="open-tag"/></p>
+                <xsl:apply-templates mode="format"/>
+                <p><xsl:apply-templates select="." mode="close-tag"/></p>
+            </xsl:when>
+            <xsl:otherwise>
+                <p><xsl:apply-templates select="." mode="markup"/></p>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
     <xsl:template match="list|quote" mode="format">
         <blockquote>
@@ -116,14 +122,12 @@
     </xsl:template>
     
     <xsl:template match="table" mode="format">
-        <p>
-            <xsl:apply-templates select="." mode="open-tag"/>
+        <p><xsl:apply-templates select="." mode="open-tag"/></p>
             <xsl:element name="{name()}">
                 <xsl:copy-of select="@*"/>
                 <xsl:apply-templates mode="format"/>
             </xsl:element>
-            <xsl:apply-templates select="." mode="close-tag"/>
-        </p>
+        <p><xsl:apply-templates select="." mode="close-tag"/></p>
     </xsl:template>
     <xsl:template match="thead|tbody" mode="format">
         <tr><td><xsl:apply-templates select="." mode="open-tag"/></td></tr>
